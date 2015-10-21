@@ -24,7 +24,7 @@ var warning = require('react/lib/warning');
 var GRAVATAR_URL = "http://gravatar.com/avatar";
 
 var USERS = [
-  { id: 1, name: 'Ryan Florence', email: 'rpflorencegmail.com' },
+  { id: 1, name: 'Ryan Florence', email: 'rpflorence@gmail.com' },
   { id: 2, name: 'Michael Jackson', email: 'mjijackson@gmail.com' }
 ];
 
@@ -35,9 +35,24 @@ var emailType = (props, propName, componentName) => {
   );
 };
 
+var emailType = (props, propName, componentName) => {
+  warning(
+    validateEmail(props.loginId),
+    `Invalid loginId '${props.loginId}' sent to 'Gravatar'. Check the render method of '${componentName}'.`
+  );
+};
+
+var numberType = (props, propName, componentName) => {
+  warning(
+    !isNaN(parseInt(props.size)),
+    `Invalid size '${props.size}' sent to 'Gravatar'. Check the render method of '${componentName}'.`
+  );
+};
+
 var Gravatar = React.createClass({
   propTypes: {
-    email: emailType
+    loginId: emailType,
+    size: numberType
   },
 
   getDefaultProps () {
@@ -47,32 +62,35 @@ var Gravatar = React.createClass({
   },
 
   render () {
-    var { email, size } = this.props;
-    var hash = md5(email);
+    var { loginId, size } = this.props;
+    var hash = md5(loginId);
     var url = `${GRAVATAR_URL}/${hash}?s=${size*2}`;
     return <img src={url} width={size} />;
   }
 });
 
 var App = React.createClass({
+  propTypes: {
+    users: React.PropTypes.array
+  },
   render () {
-    var users = USERS.map((user) => {
+    var { users } = this.props;
+    var usersUI = users.map((user) => {
       return (
         <li key={user.id}>
-          <Gravatar email={user.email} size={36} /> {user.name}
+          <Gravatar loginId={user.email} size={'100'} /> {user.name}
         </li>
       );
     });
     return (
       <div>
         <h1>Users</h1>
-        <ul>{users}</ul>
+        <ul>{usersUI}</ul>
       </div>
     );
   }
 });
 
-React.render(<App />, document.body);
+React.render(<App users={USERS} />, document.body);
 
 //require('./tests').run(Gravatar, emailType);
-
